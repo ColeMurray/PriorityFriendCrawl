@@ -9,6 +9,9 @@ public class UserPriorityQueue {
 	public UserPriorityQueue(){
 		pq = new PriorityQueue<PriorityUser>(1, new UPQComparator());
 	}
+	public PriorityQueue <PriorityUser> getPQ(){
+		return pq;
+	}
 	
 	public class UPQComparator implements Comparator<PriorityUser> {
 
@@ -30,5 +33,6 @@ public class UserPriorityQueue {
 	public void deque(PriorityUser pUser){
 		pq.remove(pUser);
 	}
+	
 
 }
