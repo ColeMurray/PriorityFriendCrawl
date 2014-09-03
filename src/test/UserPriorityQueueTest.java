@@ -7,8 +7,8 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.PriorityUser;
-import com.UserPriorityQueue;
+import com.objects.PriorityQueueTwitter;
+import com.objects.PriorityTwitUser;
 
 public class UserPriorityQueueTest {
 	
@@ -19,20 +19,20 @@ public class UserPriorityQueueTest {
 
 	@Test
 	public void testUserPriorityQueue() {
-		UserPriorityQueue pq = new UserPriorityQueue();
-		Date userA = new Date(2014,10,02);
-		Date userB = new Date(2013,10,02);
-		PriorityUser a = new PriorityUser();
-							a.setLastRetrievedTweetDate(userA);
-		PriorityUser b = new PriorityUser();
-							b.setLastRetrievedTweetDate(userB);
+		PriorityQueueTwitter pq = new PriorityQueueTwitter(1, new PriorityQueueTwitter.PQTComparator());
+		Date userADate = new Date(2014,10,02);
+		Date userBDate = new Date(2013,10,02);
+		PriorityTwitUser a = new PriorityTwitUser();
+							a.setLastRetrievedTweetDate(userADate);
+		PriorityTwitUser b = new PriorityTwitUser();
+							b.setLastRetrievedTweetDate(userBDate);
 		pq.add(b);
 		pq.add(a);
-		assertEquals("Expected 2014/10/2",userA, pq.getPQ().peek().getLastRetrievedTweetDate());
+		assertEquals("Expected 2014/10/2",userADate, ((PriorityTwitUser) pq.peek()).getLastRetrievedTweetDate());
 		
 		pq.add(a);
 		pq.add(b);
-		assertEquals("Expected 2014/10/2",userA, pq.getPQ().peek().getLastRetrievedTweetDate());
+		assertEquals("Expected 2014/10/2",userADate, ((PriorityTwitUser) pq.peek()).getLastRetrievedTweetDate());
 	}
 
 
