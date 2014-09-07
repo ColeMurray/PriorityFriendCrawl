@@ -8,7 +8,7 @@ import twitter4j.User;
 public class PriorityTwitUser extends PriorityBaseUser {
 	Twitter twitter;
 	Date lastRetrievedTweetDate;
-	long sinceID;
+	long lastId;
 	User user;
 	
 	
@@ -28,12 +28,12 @@ public class PriorityTwitUser extends PriorityBaseUser {
 		this.lastRetrievedTweetDate = lastRetrievedTweetDate;
 	}
 
-	public long getSinceID() {
-		return sinceID;
+	public long getLastId() {
+		return lastId;
 	}
 
-	public void setSinceID(long sinceID) {
-		this.sinceID = sinceID;
+	public void setLastId(long lastId) {
+		this.lastId = lastId;
 	}
 
 	public User getUser() {

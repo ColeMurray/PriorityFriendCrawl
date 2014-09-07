@@ -7,6 +7,8 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
+import com.utility.Utility;
+
 import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -44,9 +46,12 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		List <String> userTweets = new ArrayList <String>();
 		Paging pg = new Paging();
 		pg.setCount(100);
-		while (retrievalLimit <= userStatusCount ){
+		while (userTweets.size() <= retrievalLimit && userTweets.size() <= userStatusCount){
 			try {
 				PriorityUserStatus statuses = (PriorityUserStatus) twitter.getUserTimeline(this.getUser().getScreenName(), pg);
+				long lastId = Utility.getLastId(statuses);
+				this.setLastId(lastId);
+				this.setLastRetrievedTweetDate(lastRetrievedTweetDate);
 				userTweets.addAll(statuses.toJSON());
 			} catch (TwitterException e) {
 				// TODO Auto-generated catch block
