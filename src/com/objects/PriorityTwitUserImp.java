@@ -1,12 +1,14 @@
 package com.objects;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
+import com.utility.PriorityUserException;
 import com.utility.Utility;
 
 import twitter4j.Paging;
@@ -17,7 +19,18 @@ import twitter4j.TwitterObjectFactory;
 import twitter4j.User;
 
 public class PriorityTwitUserImp extends PriorityTwitUser {
-	public List <Status> retrieveUserTweets()  {
+	/** Everything is initialized as null 
+	 * 
+	 */
+	public PriorityTwitUserImp(){
+		this.setUser(null);
+		this.setTwitter(null);
+		this.setLastId(Long.MAX_VALUE);
+		this.setLastRetrievedTweetDate(null);
+	}
+	
+		public List <Status> retrieveUserTweets()  {
+	
 		Twitter twitter = this.getTwitter();
 		String screenName = getUser().getScreenName();
 
@@ -50,6 +63,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 			try {
 				PriorityUserStatus statuses = (PriorityUserStatus) twitter.getUserTimeline(this.getUser().getScreenName(), pg);
 				long lastId = Utility.getLastId(statuses);
+				Date lastRetrievedTweetDate = Utility.getLastCreatedDate(statuses);
 				this.setLastId(lastId);
 				this.setLastRetrievedTweetDate(lastRetrievedTweetDate);
 				userTweets.addAll(statuses.toJSON());
@@ -64,13 +78,46 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		
 	}
 	
-	public class PriorityUserStatus extends ArrayList<Status>{
-		/**
-		 * 
-		 */
+	public PriorityUserStatus retrieve100TweetsFromId () throws PriorityUserException{
+		if (this.getUser().getStatusesCount() == 0){
+			throw new PriorityUserException("User has no tweets");
+		}
+		long lastId = this.getLastId();
+		Paging pg = new Paging();
+		pg.setCount(100);
+		//used if user has not set a maxID
+		if (pg.getMaxId() != Long.MAX_VALUE){
+			pg.setMaxId(this.getLastId() -1);
+		}
+		List <Status> statuses = new ArrayList <Status>();
+		List <String> statusesToString = new ArrayList<String>();
+		PriorityUserStatus pStatuses = new PriorityUserStatus(statuses);
+		try{
+			
+			 statuses = this.getTwitter().getUserTimeline(this.getUser().getScreenName(),pg);
+			 pStatuses.addAll(statuses);
+			 pStatuses.statusesInString = pStatuses.toJSON();
+			 for (Status s: statuses){
+				 if (s.getId() < lastId){
+					 this.setLastId(s.getId());
+				 }	 
+			 }
+			 
+		}
+		catch (TwitterException e){
+			e.printStackTrace();
+			 return new PriorityUserStatus(new ArrayList<Status>());
+		}
+		return pStatuses;
+	}
+	
+	public static class PriorityUserStatus extends ArrayList<Status>{
+		List <String> statusesInString;
 		private static final long serialVersionUID = -3230766945065066029L;
 
-
+		public PriorityUserStatus (List <Status> statuses){
+			this.addAll(statuses);
+		}
 		/**
 		 * 
 		 * @return

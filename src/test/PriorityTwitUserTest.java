@@ -1,6 +1,6 @@
 package test;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
@@ -15,6 +15,8 @@ import twitter4j.URLEntity;
 import twitter4j.User;
 
 import com.objects.PriorityTwitUserImp;
+import com.objects.PriorityTwitUserImp.PriorityUserStatus;
+import com.utility.PriorityUserException;
 import com.utility.Utility;
 
 public class PriorityTwitUserTest {
@@ -343,27 +345,57 @@ public class PriorityTwitUserTest {
 
 	// TODO finish Setup and testTweetRetrieval
 	PriorityTwitUserImp ptUser;
+	PriorityTwitUserImp zeroTweetsPriorityUser;
 	Twitter twitter;
 	User user;
+	User zeroTweetsUser;
 	@Before
 	public void setUp() throws Exception {
 		twitter = Utility.getValidTwitterObject();
-		user = twitter.showUser("SpiritAang");
 		ptUser = new PriorityTwitUserImp();
+		user = twitter.showUser("SpiritAang");
 		ptUser.setUser(user);
 		ptUser.setTwitter(twitter);
 		
-		
-		
-	
+		zeroTweetsPriorityUser = new PriorityTwitUserImp();
+		zeroTweetsUser = twitter.showUser("blenkar");
+		zeroTweetsPriorityUser.setUser(zeroTweetsUser);
+		zeroTweetsPriorityUser.setTwitter(twitter);
 	}
-
 	@Test
-	public void test() {
-		fail("Not yet implemented");
+	public void testPriorityStatusFromList (){
+		List <Status> statuses = ptUser.retrieveUserTweets();
+		PriorityUserStatus pStatuses = new PriorityUserStatus(statuses);
+		assert(!pStatuses.isEmpty());
 	}
+	
 	public void testTweetRetrieval(){
 		List <String> returned = ptUser.retrieveTweetsInString(0);
+	}
+	
+	@Test
+	public void testRetrieve100TweetsFromId(){
+		try { 
+			PriorityUserStatus statuses = ptUser.retrieve100TweetsFromId();
+			long firstLastIdRetrieved = ptUser.getLastId();
+			System.out.println (firstLastIdRetrieved);
+			statuses.addAll( ptUser.retrieve100TweetsFromId() );
+			
+			long secondLastIdRetrieved = ptUser.getLastId();
+			assertTrue(firstLastIdRetrieved != secondLastIdRetrieved);
+		}
+		catch (PriorityUserException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		try{
+			PriorityUserStatus emptyStatuses = zeroTweetsPriorityUser.retrieve100TweetsFromId();
+		}
+		catch (PriorityUserException e ){
+			assert(e.getMessage().equals("User has no tweets"));
+		}
+		
 	}
 
 }

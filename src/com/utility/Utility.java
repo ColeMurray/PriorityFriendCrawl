@@ -15,7 +15,7 @@ public class Utility{
 	public static long getLastId (List <Status> statuses){
 		long maxId = Long.MAX_VALUE;
 		for (Status tweet : statuses){
-			if (tweet.getId() > maxId){
+			if (tweet.getId() < maxId){
 				maxId = tweet.getId();
 				
 			}

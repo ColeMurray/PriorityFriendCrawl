@@ -11,7 +11,6 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	long lastId;
 	User user;
 	
-	
 	public Twitter getTwitter() {
 		return twitter;
 	}
