@@ -10,6 +10,7 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	Date lastRetrievedTweetDate;
 	long lastId;
 	User user;
+	PriorityUserStatusList statusList;
 	
 	public Twitter getTwitter() {
 		return twitter;
@@ -41,6 +42,14 @@ public class PriorityTwitUser extends PriorityBaseUser {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public PriorityUserStatusList getStatusList() {
+		return statusList;
+	}
+
+	public void setStatusList(PriorityUserStatusList statusList) {
+		this.statusList = statusList;
 	}
 
 

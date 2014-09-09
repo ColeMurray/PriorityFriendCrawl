@@ -11,6 +11,7 @@ import org.joda.time.Days;
 import com.utility.PriorityUserException;
 import com.utility.Utility;
 
+import twitter4j.PagableResponseList;
 import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -27,6 +28,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		this.setTwitter(null);
 		this.setLastId(Long.MAX_VALUE);
 		this.setLastRetrievedTweetDate(null);
+		this.setStatusList(new PriorityUserStatusList(new ArrayList <Status>()));
 	}
 	
 		public List <Status> retrieveUserTweets()  {
@@ -44,41 +46,11 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 
 	}
 	
-	public List<String> getTweetsIn6Weeks(int retrievalLimit) throws IllegalArgumentException{
-		if (!isValidArgs(retrievalLimit)){
-			throw new IllegalArgumentException();
-		}
-		
-		PriorityUserStatus userTweets =  (PriorityUserStatus) retrieveUserTweets();
-		return userTweets.toJSON();
-		
-	}
+
 	
-	public List <String> retrieveTweetsInString (int retrievalLimit){
-		int userStatusCount = getUser().getStatusesCount();
-		List <String> userTweets = new ArrayList <String>();
-		Paging pg = new Paging();
-		pg.setCount(100);
-		while (userTweets.size() <= retrievalLimit && userTweets.size() <= userStatusCount){
-			try {
-				PriorityUserStatus statuses = (PriorityUserStatus) twitter.getUserTimeline(this.getUser().getScreenName(), pg);
-				long lastId = Utility.getLastId(statuses);
-				Date lastRetrievedTweetDate = Utility.getLastCreatedDate(statuses);
-				this.setLastId(lastId);
-				this.setLastRetrievedTweetDate(lastRetrievedTweetDate);
-				userTweets.addAll(statuses.toJSON());
-			} catch (TwitterException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			
-		}
-		return userTweets;
-		
-	}
 	
-	public PriorityUserStatus retrieve100TweetsFromId () throws PriorityUserException{
+	
+	public PriorityUserStatusList retrieve100TweetsFromId () throws PriorityUserException{
 		if (this.getUser().getStatusesCount() == 0){
 			throw new PriorityUserException("User has no tweets");
 		}
@@ -86,60 +58,67 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		Paging pg = new Paging();
 		pg.setCount(100);
 		//used if user has not set a maxID
-		if (pg.getMaxId() != Long.MAX_VALUE){
+		if (lastId != Long.MAX_VALUE){
 			pg.setMaxId(this.getLastId() -1);
 		}
 		List <Status> statuses = new ArrayList <Status>();
-		List <String> statusesToString = new ArrayList<String>();
-		PriorityUserStatus pStatuses = new PriorityUserStatus(statuses);
+		PriorityUserStatusList pStatuses = new PriorityUserStatusList(statuses);
 		try{
 			
 			 statuses = this.getTwitter().getUserTimeline(this.getUser().getScreenName(),pg);
 			 pStatuses.addAll(statuses);
-			 pStatuses.statusesInString = pStatuses.toJSON();
-			 for (Status s: statuses){
-				 if (s.getId() < lastId){
-					 this.setLastId(s.getId());
-				 }	 
-			 }
+			 pStatuses.statusesInJSON = pStatuses.toJSON();
+			 Object[] lastIdAndLastDate = Utility.getLastIdAndLastCreatedDate(pStatuses);
+			 this.setLastId((Long)lastIdAndLastDate[0]);
+			 pg.setMaxId(getLastId());
+			 this.setLastRetrievedTweetDate((Date)lastIdAndLastDate[1]);
 			 
 		}
 		catch (TwitterException e){
 			e.printStackTrace();
-			 return new PriorityUserStatus(new ArrayList<Status>());
+			 return new PriorityUserStatusList(new ArrayList<Status>());
 		}
 		return pStatuses;
 	}
-	
-	public static class PriorityUserStatus extends ArrayList<Status>{
-		List <String> statusesInString;
-		private static final long serialVersionUID = -3230766945065066029L;
-
-		public PriorityUserStatus (List <Status> statuses){
-			this.addAll(statuses);
+	public List <User> getFriendsOfUser(int friendAmountToReturn){
+		PagableResponseList <User> friendsList;
+		List <User> friendsListToReturn = new ArrayList<User>();
+		long cursor = -1;
+		try {
+			do{
+				friendsList = this.getTwitter().
+						getFriendsList(this.getUser().getScreenName(), cursor);
+				friendsListToReturn.addAll(purgeHighFollowingCountUsers(friendsList));
+			} while ((cursor = friendsList.getNextCursor()) != 0 && !hasReachedFriendCapCount(friendsList, friendAmountToReturn));
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		/**
-		 * 
-		 * @return
-		 */
-		public List <String> toJSON(){
-			List <String> JSON = new ArrayList<String>();
-			for ( Status s : this ){
-				String tweetToJSON = TwitterObjectFactory.getRawJSON(s);
-				JSON.add(tweetToJSON);
-				
-			}
-			return JSON;
-		}
+		return friendsListToReturn;
 		
 	}
-	
-	private boolean isValidArgs(int retrievalLimit) {
-		if (retrievalLimit <= 0)
+	private List <User> purgeHighFollowingCountUsers(List <User> userList){
+		int HighFollowingCount = 10000;
+		List <User> purgedList = new ArrayList<User>();
+		for (User u : userList){
+			if (!u.isProtected() && u.getFollowersCount() < HighFollowingCount){
+				purgedList.add(u);
+				
+			}
+		}
+		return purgedList;
+		
+	}
+	private boolean hasReachedFriendCapCount (List <User> userList, int friendCapCount){
+		if ( userList.size() < friendCapCount){
 			return false;
+		}
 		return true;
 		
 	}
+	
+	
+	
 	public List<String> getTweetsIn6Weeks(Twitter twitter, User u,
 			int count) {
 		int days = 42; // 6 weeks in our example

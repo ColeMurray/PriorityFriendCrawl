@@ -12,7 +12,7 @@ public class Utility{
 		return ConfigBuilder.getTwitter();
 	}
 	
-	public static long getLastId (List <Status> statuses){
+	public static long getLastIdFromStatusList (List <Status> statuses){
 		long maxId = Long.MAX_VALUE;
 		for (Status tweet : statuses){
 			if (tweet.getId() < maxId){
@@ -23,7 +23,7 @@ public class Utility{
 		return maxId;
 	}
 
-	public static Date getLastCreatedDate (List <Status> statuses){
+	public static Date getLastCreatedDateFromStatusList (List <Status> statuses){
 		Date lastCreatedDate = new Date();
 		for (Status t: statuses){
 			if (t.getCreatedAt().before(lastCreatedDate)){
@@ -40,10 +40,12 @@ public class Utility{
 	 * 		   param[1] lastCreated Date
 	 */
 	public static Object[] getLastIdAndLastCreatedDate (List <Status> statuses){
-		long lastId = getLastId(statuses);
-		Date lastCreatedDate = getLastCreatedDate(statuses);
+		long lastId = getLastIdFromStatusList(statuses);
+		Date lastCreatedDate = getLastCreatedDateFromStatusList(statuses);
 		
 		return new Object[]{lastId,lastCreatedDate};
 	}
+	
+	
 
 }

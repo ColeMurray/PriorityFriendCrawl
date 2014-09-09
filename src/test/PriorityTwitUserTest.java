@@ -1,6 +1,8 @@
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +17,7 @@ import twitter4j.URLEntity;
 import twitter4j.User;
 
 import com.objects.PriorityTwitUserImp;
-import com.objects.PriorityTwitUserImp.PriorityUserStatus;
+import com.objects.PriorityUserStatusList;
 import com.utility.PriorityUserException;
 import com.utility.Utility;
 
@@ -365,22 +367,18 @@ public class PriorityTwitUserTest {
 	@Test
 	public void testPriorityStatusFromList (){
 		List <Status> statuses = ptUser.retrieveUserTweets();
-		PriorityUserStatus pStatuses = new PriorityUserStatus(statuses);
+		PriorityUserStatusList pStatuses = new PriorityUserStatusList(statuses);
 		assert(!pStatuses.isEmpty());
 	}
 	
-	public void testTweetRetrieval(){
-		List <String> returned = ptUser.retrieveTweetsInString(0);
-	}
 	
 	@Test
 	public void testRetrieve100TweetsFromId(){
 		try { 
-			PriorityUserStatus statuses = ptUser.retrieve100TweetsFromId();
+			PriorityUserStatusList statuses = ptUser.retrieve100TweetsFromId();
 			long firstLastIdRetrieved = ptUser.getLastId();
 			System.out.println (firstLastIdRetrieved);
-			statuses.addAll( ptUser.retrieve100TweetsFromId() );
-			
+			statuses.addAll( ptUser.retrieve100TweetsFromId());
 			long secondLastIdRetrieved = ptUser.getLastId();
 			assertTrue(firstLastIdRetrieved != secondLastIdRetrieved);
 		}
@@ -390,12 +388,18 @@ public class PriorityTwitUserTest {
 		}
 		
 		try{
-			PriorityUserStatus emptyStatuses = zeroTweetsPriorityUser.retrieve100TweetsFromId();
+			PriorityUserStatusList emptyStatuses = zeroTweetsPriorityUser.retrieve100TweetsFromId();
 		}
 		catch (PriorityUserException e ){
 			assert(e.getMessage().equals("User has no tweets"));
 		}
 		
+	}
+	@Test
+	public void testGetFriends(){
+		List <User> userList;
+		userList = ptUser.getFriendsOfUser(200);
+		assertNotNull(userList);
 	}
 
 }
