@@ -4,20 +4,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.joda.time.DateTime;
-import org.joda.time.Days;
+import java.util.Scanner;
 
 import twitter4j.PagableResponseList;
 import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
-import twitter4j.TwitterObjectFactory;
 import twitter4j.User;
 
+import com.objects.PriorityQueueTwitter.PQTComparator;
 import com.utility.PriorityUserException;
 import com.utility.Utility;
+import com.utility.WriteFunctions;
 
 public class PriorityTwitUserImp extends PriorityTwitUser {
 	/**
@@ -27,19 +26,28 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 	public PriorityTwitUserImp() {
 		setupPriorityTwitUserImp();
 	}
-	public PriorityTwitUserImp(Twitter t, User u){
+
+	public PriorityTwitUserImp(Twitter t, User u) {
 		setupPriorityTwitUserImp();
 		this.setTwitterAndUser(t, u);
+		
+	}
+	public PriorityTwitUserImp(Twitter t, User u, String parentScreenName ){
+		setupPriorityTwitUserImp();
+		this.setTwitterAndUser(t,u);
+		this.setParentScreenName(parentScreenName);
 	}
 
-	public void setupPriorityTwitUserImp(){
+	public void setupPriorityTwitUserImp() {
 		this.setUser(null);
 		this.setTwitter(null);
 		this.setLastId(Long.MAX_VALUE);
 		this.setLastRetrievedTweetDate(new Date());
 		this.setStatusList(new PriorityUserStatusList(new ArrayList<Status>()));
 		this.setParentScreenName("");
+		this.setHasRetrievedFriends(false);
 	}
+
 	public String getPath() {
 		if (this.getParentScreenName() == "") {
 			return this.getScreenName();
@@ -88,21 +96,28 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 			statuses = this.getTwitter().getUserTimeline(
 					this.getUser().getScreenName(), pg);
 			pStatuses.addAll(statuses);
-			pStatuses.statusesInJSON = pStatuses.toJSON(); 
-			Object[] lastIdAndLastDate = Utility.
-									getLastIdAndLastCreatedDate(pStatuses);
+			pStatuses.statusesInJSON = pStatuses.toJSON();
+			Object[] lastIdAndLastDate = Utility
+					.getLastIdAndLastCreatedDate(pStatuses);
 			this.setLastId((Long) lastIdAndLastDate[0]);
 			pg.setMaxId(getLastId());
 			this.setLastRetrievedTweetDate((Date) lastIdAndLastDate[1]);
 
 		} catch (TwitterException e) {
-			e.printStackTrace();
-			throw new PriorityUserException ("User could not be looked up");
+			if (checkAndWaitForConnection(e)) {
+				return retrieve100TweetsFromId();
+			} else {
+				e.printStackTrace();
+				throw new PriorityUserException("User could not be looked up");
+			}
 		}
 		return pStatuses;
 	}
 
 	public List<User> getFriendsOfUser(int friendAmountToReturn) {
+		if (hasRetrievedFriends){
+			return getFriendsList();
+		}
 		PagableResponseList<User> friendsList;
 		List<User> friendsListToReturn = new ArrayList<User>();
 		long cursor = -1;
@@ -116,11 +131,53 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 					&& !hasReachedFriendCapCount(friendsList,
 							friendAmountToReturn));
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (checkAndWaitForConnection(e)) {
+				return getFriendsOfUser(friendAmountToReturn);
+
+			} else
+				e.printStackTrace();
+
 		}
+		this.setHasRetrievedFriends(true);
+		this.setFriendsList(friendsListToReturn);
 		return friendsListToReturn;
 
+	}
+	public void getUserTweetsAndWriteToFile() {
+		try {
+			this.setStatusList(this.retrieve100TweetsFromId());
+			String path = this.getPath();
+			WriteFunctions.writeTweetsToFile(this.getStatusList()
+					.getStatusesInJSON(), path);
+		} catch (PriorityUserException e) {
+			// User has no tweets, no reason to re-add them to file
+			e.printStackTrace();
+		}
+
+	}
+
+	public boolean checkAndWaitForConnection(TwitterException e) {
+		Scanner scanner = new Scanner(System.in);
+
+		if (e.isCausedByNetworkIssue()) {
+			System.out
+					.println("Connection issues, Confirm connected to internet");
+			System.out.println("Press enter when connection resumed");
+			String s = "";
+			while (s != null && !s.equals("y")) {
+				s = scanner.nextLine();
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public PriorityQueueTwitter getFriendsInPriorityQueue() {
+		List<User> friendList = getFriendsOfUser(200);
+		PriorityQueueTwitter pq = new PriorityQueueTwitter(friendList,
+				new PQTComparator(), this.getScreenName());
+		return pq;
 	}
 
 	private List<User> purgeHighFollowingCountUsers(List<User> userList) {
@@ -144,7 +201,5 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		return true;
 
 	}
-
-	
 
 }

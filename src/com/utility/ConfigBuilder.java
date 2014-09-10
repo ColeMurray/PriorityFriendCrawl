@@ -62,7 +62,7 @@ public class ConfigBuilder {
 				if (secondsTilReset < 0) {
 					secondsTilReset = 0;
 				}
-				if (event.getRateLimitStatus().getRemaining() < 4) {
+				if (event.getRateLimitStatus().getRemaining() < 3) {
 					System.out
 							.println("Rate has been reached. Sleeping for: "
 									+ event.getRateLimitStatus()
@@ -89,11 +89,11 @@ public class ConfigBuilder {
 				}
 				System.out.println("Calls remaining: "
 						+ event.getRateLimitStatus().getRemaining());
-				if (event.getRateLimitStatus().getRemaining() < 4) {
+				if (event.getRateLimitStatus().getRemaining() < 3) {
 					System.out
-							.println("3 remaining calls. Sleeping for: "
-									+ event.getRateLimitStatus()
-											.getSecondsUntilReset());
+							.println( event.getRateLimitStatus().getRemaining() + 
+									" remaining calls. Sleeping for: " +
+									event.getRateLimitStatus().getSecondsUntilReset());
 					try {
 						Thread.sleep((secondsTilReset + 3) * 1000);
 					} catch (InterruptedException e) {

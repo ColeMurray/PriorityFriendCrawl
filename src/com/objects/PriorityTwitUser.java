@@ -1,6 +1,7 @@
 package com.objects;
 
 import java.util.Date;
+import java.util.List;
 
 import twitter4j.Twitter;
 import twitter4j.User;
@@ -12,7 +13,25 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	User user;
 	PriorityUserStatusList statusList;
 	String parentScreenName;
+	boolean hasRetrievedFriends;
+	List <User> friendsList;
 	
+	public List <User> getFriendsList() {
+		return friendsList;
+	}
+
+	public void setFriendsList(List <User> friendsList) {
+		this.friendsList = friendsList;
+	}
+
+	public boolean isHasRetrievedFriends() {
+		return hasRetrievedFriends;
+	}
+
+	public void setHasRetrievedFriends(boolean hasRetrievedFriends) {
+		this.hasRetrievedFriends = hasRetrievedFriends;
+	}
+
 	public String getParentScreenName() {
 		return parentScreenName;
 	}
