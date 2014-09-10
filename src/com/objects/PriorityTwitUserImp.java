@@ -46,6 +46,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		this.setStatusList(new PriorityUserStatusList(new ArrayList<Status>()));
 		this.setParentScreenName("");
 		this.setHasRetrievedFriends(false);
+		this.setReceivedAllTweets(false);
 	}
 
 	public String getPath() {
@@ -80,7 +81,13 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 	public PriorityUserStatusList retrieve100TweetsFromId()
 			throws PriorityUserException {
 		if (this.getUser().getStatusesCount() == 0) {
-			throw new PriorityUserException("User has no tweets");
+			this.setLastRetrievedTweetDate(new Date (Long.MIN_VALUE));
+			this.setReceivedAllTweets(true);
+			throw new PriorityUserException(PriorityUserException.ALL_TWEETS);
+		}
+		
+		if (this.isReceivedAllTweets()){
+			throw new PriorityUserException(PriorityUserException.ALL_TWEETS);
 		}
 		long lastId = this.getLastId();
 		Paging pg = new Paging();
@@ -95,6 +102,10 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 
 			statuses = this.getTwitter().getUserTimeline(
 					this.getUser().getScreenName(), pg);
+			if (statuses.size() == 0){
+				this.setReceivedAllTweets(true);
+				throw new PriorityUserException(PriorityUserException.ALL_TWEETS);
+			}
 			pStatuses.addAll(statuses);
 			pStatuses.statusesInJSON = pStatuses.toJSON();
 			Object[] lastIdAndLastDate = Utility
@@ -108,7 +119,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 				return retrieve100TweetsFromId();
 			} else {
 				e.printStackTrace();
-				throw new PriorityUserException("User could not be looked up");
+				throw new PriorityUserException(PriorityUserException.INACCESSIBLE_USER);
 			}
 		}
 		return pStatuses;
@@ -143,16 +154,12 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		return friendsListToReturn;
 
 	}
-	public void getUserTweetsAndWriteToFile() {
-		try {
+	public void getUserTweetsAndWriteToFile() throws PriorityUserException {
 			this.setStatusList(this.retrieve100TweetsFromId());
 			String path = this.getPath();
 			WriteFunctions.writeTweetsToFile(this.getStatusList()
 					.getStatusesInJSON(), path);
-		} catch (PriorityUserException e) {
-			// User has no tweets, no reason to re-add them to file
-			e.printStackTrace();
-		}
+	
 
 	}
 

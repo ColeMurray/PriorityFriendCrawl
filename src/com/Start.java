@@ -1,5 +1,6 @@
 package com;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import twitter4j.Twitter;
@@ -10,19 +11,28 @@ import com.objects.PriorityQueueTwitter;
 import com.objects.PriorityQueueTwitter.PQTComparator;
 import com.objects.PriorityTwitUserImp;
 import com.utility.ConfigBuilder;
+import com.utility.PriorityUserException;
 import com.utility.Utility;
 
 public class Start {
 	public static void main(String[] args) throws TwitterException {
 		PriorityQueueTwitter pq;
 		pq = new PriorityQueueTwitter(1, new PQTComparator());
+		
+		List <User> mockUserList = mockData();
+		for (User u : mockUserList){
+			PriorityTwitUserImp pUser = new PriorityTwitUserImp(
+					ConfigBuilder.getTwitter(), u);
+			pq.add(pUser);
+			
+		}
 
-		List<User> userList = Utility.getUserListFromFile("userNames.json");
+	/*	List<User> userList = Utility.getUserListFromFile("userNames.json");
 		for (User u : userList) {
 			PriorityTwitUserImp pUser = new PriorityTwitUserImp(
 					ConfigBuilder.getTwitter(), u);
 			pq.add(pUser);
-		}
+		} */
 
 		GetAndWriteTweetsThread tweetWriteThread = new GetAndWriteTweetsThread(
 				"writeTweetsThread", pq);
@@ -30,6 +40,23 @@ public class Start {
 		GetFriendsListThread friendsListThread = new GetFriendsListThread(
 				"friendsListThread", pq);
 		friendsListThread.start();
+	}
+	private static List <User> mockData() {
+		Twitter twitter = ConfigBuilder.getTwitter();
+		try {
+			User u = twitter.showUser("SpiritAang");
+			User blenkar = twitter.showUser("blenkar");
+			List <User> userList = new ArrayList<User>();
+			userList.add(u);
+			userList.add(blenkar);
+			return userList;
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
+		
 	}
 
 	public static class GetAndWriteTweetsThread implements Runnable {
@@ -46,9 +73,23 @@ public class Start {
 		public void run() {
 			while (true) {
 				PriorityTwitUserImp user;
-				user = (PriorityTwitUserImp) pq.peek();
+				user = (PriorityTwitUserImp) pq.poll();
 				if (user != null) {
-					user.getUserTweetsAndWriteToFile();
+					try {
+						if (!user.isReceivedAllTweets())
+						user.getUserTweetsAndWriteToFile();
+						
+						pq.add(user);
+					} catch (PriorityUserException e) {
+						// TODO Auto-generated catch block
+						
+						e.printStackTrace();
+						if (e.getMessage().equals(PriorityUserException.INACCESSIBLE_USER))
+						pq.remove();
+						else{
+							pq.add(user);
+						}
+					}
 
 				}
 			}

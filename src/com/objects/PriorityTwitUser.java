@@ -14,6 +14,7 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	PriorityUserStatusList statusList;
 	String parentScreenName;
 	boolean hasRetrievedFriends;
+	boolean receivedAllTweets;
 	List <User> friendsList;
 	
 	public List <User> getFriendsList() {
@@ -84,6 +85,14 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	public void setTwitterAndUser (Twitter t, User u){
 		this.setTwitter(t);
 		this.setUser(u);
+	}
+
+	public boolean isReceivedAllTweets() {
+		return receivedAllTweets;
+	}
+
+	public void setReceivedAllTweets(boolean receivedAllTweets) {
+		this.receivedAllTweets = receivedAllTweets;
 	}
 
 
