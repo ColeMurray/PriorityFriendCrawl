@@ -1,7 +1,4 @@
 package com.objects;
-import java.util.Date;
-
-import twitter4j.Twitter;
 import twitter4j.User;
 
 

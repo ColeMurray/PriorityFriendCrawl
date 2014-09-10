@@ -1,6 +1,10 @@
 package com.utility;
 
 public class PriorityUserException extends Exception {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public PriorityUserException(){
 		super();
 	}

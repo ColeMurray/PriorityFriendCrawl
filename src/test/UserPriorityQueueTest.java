@@ -29,7 +29,7 @@ public class UserPriorityQueueTest {
 		pq.add(b);
 		pq.add(a);
 		assertEquals("Expected 2014/10/2",userADate, ((PriorityTwitUser) pq.peek()).getLastRetrievedTweetDate());
-		
+		pq.clear();
 		pq.add(a);
 		pq.add(b);
 		assertEquals("Expected 2014/10/2",userADate, ((PriorityTwitUser) pq.peek()).getLastRetrievedTweetDate());

@@ -11,7 +11,16 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	long lastId;
 	User user;
 	PriorityUserStatusList statusList;
+	String parentScreenName;
 	
+	public String getParentScreenName() {
+		return parentScreenName;
+	}
+
+	public void setParentScreenName(String parentScreenName) {
+		this.parentScreenName = parentScreenName;
+	}
+
 	public Twitter getTwitter() {
 		return twitter;
 	}
@@ -50,6 +59,12 @@ public class PriorityTwitUser extends PriorityBaseUser {
 
 	public void setStatusList(PriorityUserStatusList statusList) {
 		this.statusList = statusList;
+	}
+	
+
+	public void setTwitterAndUser (Twitter t, User u){
+		this.setTwitter(t);
+		this.setUser(u);
 	}
 
 
