@@ -25,6 +25,14 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 	 * 
 	 */
 	public PriorityTwitUserImp() {
+		setupPriorityTwitUserImp();
+	}
+	public PriorityTwitUserImp(Twitter t, User u){
+		setupPriorityTwitUserImp();
+		this.setTwitterAndUser(t, u);
+	}
+
+	public void setupPriorityTwitUserImp(){
 		this.setUser(null);
 		this.setTwitter(null);
 		this.setLastId(Long.MAX_VALUE);
@@ -32,7 +40,6 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		this.setStatusList(new PriorityUserStatusList(new ArrayList<Status>()));
 		this.setParentScreenName("");
 	}
-
 	public String getPath() {
 		if (this.getParentScreenName() == "") {
 			return this.getScreenName();
@@ -90,7 +97,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 
 		} catch (TwitterException e) {
 			e.printStackTrace();
-			return new PriorityUserStatusList(new ArrayList<Status>());
+			throw new PriorityUserException ("User could not be looked up");
 		}
 		return pStatuses;
 	}

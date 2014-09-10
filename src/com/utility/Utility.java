@@ -1,10 +1,15 @@
 package com.utility;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
+import twitter4j.TwitterObjectFactory;
+import twitter4j.User;
 
 public class Utility{
 	public static Twitter getValidTwitterObject(){
@@ -43,6 +48,30 @@ public class Utility{
 		Date lastCreatedDate = getLastCreatedDateFromStatusList(statuses);
 		
 		return new Object[]{lastId,lastCreatedDate};
+	}
+	
+	public static List<User> getUserListFromFile(String filename) {
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(filename));
+
+			String userToBuild;
+			List<User> userList = new ArrayList<User>();
+
+			while ((userToBuild = br.readLine()) != null) {
+				User user = TwitterObjectFactory.createUser(userToBuild);
+				if (!user.isProtected())
+				userList.add(user);
+
+			}
+
+			br.close();
+			return userList;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
 	}
 	
 	

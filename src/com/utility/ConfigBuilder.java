@@ -9,10 +9,11 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import twitter4j.RateLimitStatusEvent;
+import twitter4j.RateLimitStatusListener;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-
 
 public class ConfigBuilder {
 
@@ -51,6 +52,57 @@ public class ConfigBuilder {
 		ConfigurationBuilder cb = ConfigBuilder.getConfigBuilder(ck);
 
 		Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+		twitter.addRateLimitStatusListener(new RateLimitStatusListener() {
+
+			@Override
+			public void onRateLimitReached(RateLimitStatusEvent event) {
+				// TODO Auto-generated method stub
+				int secondsTilReset = event.getRateLimitStatus()
+						.getSecondsUntilReset();
+				if (secondsTilReset < 0) {
+					secondsTilReset = 0;
+				}
+				if (event.getRateLimitStatus().getRemaining() < 4) {
+					System.out
+							.println("Rate has been reached. Sleeping for: "
+									+ event.getRateLimitStatus()
+											.getSecondsUntilReset());
+					try {
+
+						Thread.sleep((secondsTilReset + 3) * 1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+
+						e.printStackTrace();
+					}
+				}
+
+			}
+
+			@Override
+			public void onRateLimitStatus(RateLimitStatusEvent event) {
+				// TODO Auto-generated method stub
+				int secondsTilReset = event.getRateLimitStatus()
+						.getSecondsUntilReset();
+				if (secondsTilReset < 0) {
+					secondsTilReset = 0;
+				}
+				System.out.println("Calls remaining: "
+						+ event.getRateLimitStatus().getRemaining());
+				if (event.getRateLimitStatus().getRemaining() < 4) {
+					System.out
+							.println("3 remaining calls. Sleeping for: "
+									+ event.getRateLimitStatus()
+											.getSecondsUntilReset());
+					try {
+						Thread.sleep((secondsTilReset + 3) * 1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
+		});
 		return twitter;
 	}
 
