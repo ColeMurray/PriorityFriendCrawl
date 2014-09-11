@@ -23,12 +23,11 @@ public class PriorityTwitThreads {
 				user = (PriorityTwitUserImp) pq.peek();
 				if (user != null) {
 					try {
-						if (!user.isReceivedAllTweets())
 							user.getUserTweetsAndWriteToFile();
 
 					} catch (PriorityUserException e) {
 						e.printStackTrace();
-	
+						if(e.getMessage().equals(PriorityUserException.INACCESSIBLE_USER))
 							pq.remove();
 					}
 
