@@ -23,6 +23,7 @@ public class UserPriorityQueueTest {
 	public void setUp() throws Exception {
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testUserPriorityQueue() {
 		PriorityQueueTwitter pq = new PriorityQueueTwitter(1,
@@ -55,7 +56,6 @@ public class UserPriorityQueueTest {
 		try {
 			freshTwitUser = twitter.showUser("SpiritAang");
 		} catch (TwitterException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -63,7 +63,11 @@ public class UserPriorityQueueTest {
 		freshUser = new PriorityTwitUserImp(ConfigBuilder.getTwitter(),
 				freshTwitUser);
 		pq.add(freshUser);
-		pq.addAll(freshUser.getFriendsInPriorityQueue());
+		try {
+			pq.addAll(freshUser.getFriendsInPriorityQueue());
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
 		assert (pq.size() != 1);
 	}
 

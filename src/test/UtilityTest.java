@@ -1,5 +1,7 @@
 package test;
 
+import static org.junit.Assert.fail;
+
 import java.util.Date;
 import java.util.List;
 
@@ -43,7 +45,7 @@ public class UtilityTest{
 			assert (receivedDate.equals(defaultConstructorDate));
 		}
 		catch (TwitterException e)
-		{}
+		{fail();}
 		
 	}
 	

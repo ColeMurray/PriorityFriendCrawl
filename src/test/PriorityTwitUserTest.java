@@ -9,8 +9,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
+import twitter4j.TwitterException;
 import twitter4j.User;
 
 import com.objects.PriorityTwitUserImp;
@@ -19,9 +21,6 @@ import com.utility.PriorityUserException;
 import com.utility.Utility;
 
 public class PriorityTwitUserTest {
-	
-
-	// TODO finish Setup and testTweetRetrieval
 	PriorityTwitUserImp ptUser;
 	PriorityTwitUserImp zeroTweetsPriorityUser;
 	Twitter twitter;
@@ -42,19 +41,27 @@ public class PriorityTwitUserTest {
 	}
 	@Test
 	public void testPriorityStatusFromList (){
-		List <Status> statuses = ptUser.retrieveUserTweets();
+		Paging pg = new Paging();
+		pg.setCount(100);
+		List<Status> statuses = null;
+		try {
+			statuses = ptUser.retrieveUserTweets(pg);
+		} catch (PriorityUserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		PriorityUserStatusList pStatuses = new PriorityUserStatusList(statuses);
 		assert(!pStatuses.isEmpty());
 	}
-	
-	
+
 	@Test
 	public void testRetrieve100TweetsFromId(){
 		try { 
-			PriorityUserStatusList statuses = ptUser.retrieve100TweetsFromId();
+			ptUser.retrieve100TweetsAndUpdateUser();
 			long firstLastIdRetrieved = ptUser.getLastId();
 			System.out.println (firstLastIdRetrieved);
-			statuses.addAll( ptUser.retrieve100TweetsFromId());
+			
+			ptUser.retrieve100TweetsAndUpdateUser();
 			long secondLastIdRetrieved = ptUser.getLastId();
 			assertTrue(firstLastIdRetrieved != secondLastIdRetrieved);
 		}
@@ -64,17 +71,23 @@ public class PriorityTwitUserTest {
 		}
 		
 		try{
-			PriorityUserStatusList emptyStatuses = zeroTweetsPriorityUser.retrieve100TweetsFromId();
+			zeroTweetsPriorityUser.retrieve100TweetsAndUpdateUser();
 		}
 		catch (PriorityUserException e ){
-			assert(e.getMessage().equals("User has no tweets"));
+			assert(e.getMessage().equals(PriorityUserException.ALL_TWEETS));
 		}
 		
 	}
+	
 	@Test
 	public void testGetFriends(){
-		List <User> userList;
-		userList = ptUser.getFriendsOfUser(200);
+		List <User> userList = null;
+		try {
+			userList = ptUser.getFriendsOfUser(200);
+		} catch (TwitterException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		assertNotNull(userList);
 	}
 

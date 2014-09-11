@@ -73,6 +73,37 @@ public class Utility{
 		}
 
 	}
+	public static List <String> toJSON(List <Status> statuses){
+		List <String> JSON = new ArrayList<String>();
+		for ( Status s : statuses ){
+			String tweetToJSON = TwitterObjectFactory.getRawJSON(s);
+			JSON.add(tweetToJSON);
+			
+		}
+		return JSON;
+	}
+	
+	public static List<User> purgeHighFollowingCountUsers(List<User> userList) {
+		int HighFollowingCount = 10000;
+		List<User> purgedList = new ArrayList<User>();
+		for (User u : userList) {
+			if (!u.isProtected() && u.getFollowersCount() < HighFollowingCount) {
+				purgedList.add(u);
+
+			}
+		}
+		return purgedList;
+
+	}
+	
+	public static boolean hasReachedFriendCapCount(List<User> userList,
+			int friendCapCount) {
+		if (userList.size() < friendCapCount) {
+			return false;
+		}
+		return true;
+
+	}
 	
 	
 

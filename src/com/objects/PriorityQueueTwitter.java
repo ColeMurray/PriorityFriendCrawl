@@ -7,8 +7,6 @@ import java.util.PriorityQueue;
 import twitter4j.User;
 
 import com.utility.ConfigBuilder;
-import com.utility.PriorityUserException;
-import com.utility.WriteFunctions;
 
 public class PriorityQueueTwitter extends PriorityQueue<PriorityTwitUser> {
 	public PriorityQueueTwitter(int i, PQTComparator pqtComparator) {

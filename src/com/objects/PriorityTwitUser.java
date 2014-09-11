@@ -11,7 +11,6 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	Date lastRetrievedTweetDate;
 	long lastId;
 	User user;
-	PriorityUserStatusList statusList;
 	String parentScreenName;
 	boolean hasRetrievedFriends;
 	boolean receivedAllTweets;
@@ -72,16 +71,7 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	public void setUser(User user) {
 		this.user = user;
 	}
-
-	public PriorityUserStatusList getStatusList() {
-		return statusList;
-	}
-
-	public void setStatusList(PriorityUserStatusList statusList) {
-		this.statusList = statusList;
-	}
 	
-
 	public void setTwitterAndUser (Twitter t, User u){
 		this.setTwitter(t);
 		this.setUser(u);
