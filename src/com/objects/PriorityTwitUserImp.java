@@ -46,7 +46,6 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		this.setParentScreenName("");
 		this.setHasRetrievedFriends(false);
 		this.setReceivedAllTweets(false);
-		this.setAmountOfTweetsReceived(0);
 	}
 
 	public String getPath() {
@@ -95,13 +94,14 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		if (lastId != Long.MAX_VALUE)
 			pg.setMaxId(lastId - 1);
 		statuses = retrieveUserTweets(pg);
-		this.increaseTweetRetrievedCount(statuses.size());
-		statusesInJSON = Utility.toJSON(statuses);
-		if (this.getAmountOfTweetsReceived() == getUser().getStatusesCount()) {
+		if (statuses.size() == 0) {
 			updateZeroStatusUser();
+			throw new PriorityUserException(PriorityUserException.ALL_TWEETS);
 		} else {
 			updateLastIdAndLastReceivedDate(statuses);
 		}
+
+		statusesInJSON = Utility.toJSON(statuses);
 
 		return statusesInJSON;
 
@@ -117,11 +117,6 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 	private void updateZeroStatusUser() {
 		this.setLastRetrievedTweetDate(new Date(Long.MIN_VALUE));
 		this.setReceivedAllTweets(true);
-	}
-
-	private void increaseTweetRetrievedCount(int retrievedCount) {
-		int curr = this.getAmountOfTweetsReceived();
-		this.setAmountOfTweetsReceived(curr + retrievedCount);
 	}
 
 	private void updateLastIdAndLastReceivedDate(List<Status> statuses) {

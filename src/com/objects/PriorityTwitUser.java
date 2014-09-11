@@ -15,15 +15,7 @@ public class PriorityTwitUser extends PriorityBaseUser {
 	boolean hasRetrievedFriends;
 	boolean receivedAllTweets;
 	List <User> friendsList;
-	int amountOfTweetsReceived;
-	
-	public int getAmountOfTweetsReceived() {
-		return amountOfTweetsReceived;
-	}
 
-	public void setAmountOfTweetsReceived(int amountOfTweetsReceived) {
-		this.amountOfTweetsReceived = amountOfTweetsReceived;
-	}
 
 	public List <User> getFriendsList() {
 		return friendsList;
