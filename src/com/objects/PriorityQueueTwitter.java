@@ -3,19 +3,20 @@ package com.objects;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import twitter4j.User;
 
 import com.utility.ConfigBuilder;
 
-public class PriorityQueueTwitter extends PriorityQueue<PriorityTwitUser> {
+public class PriorityQueueTwitter extends PriorityBlockingQueue<PriorityTwitUser> {
 	public PriorityQueueTwitter(int i, PQTComparator pqtComparator) {
 		super(i, pqtComparator);
 	}
 
 	public PriorityQueueTwitter(List<User> userList,
 			PQTComparator pqtComparator, String parent) {
-		super(pqtComparator);
+		super(1,pqtComparator);
 		for (User u : userList) {
 			PriorityTwitUserImp pUser = new PriorityTwitUserImp(
 					ConfigBuilder.getTwitter(), u, parent);

@@ -14,9 +14,10 @@ import com.utility.ConfigBuilder;
 import com.utility.Utility;
 
 public class Start {
+	static PriorityQueueTwitter pq = new PriorityQueueTwitter(1, new PQTComparator());
+
 	public static void main(String[] args) throws TwitterException {
-		PriorityQueueTwitter pq;
-		pq = new PriorityQueueTwitter(1, new PQTComparator());
+
 
 		/*
 		 * List <User> mockUserList = mockData(); for (User u : mockUserList){
