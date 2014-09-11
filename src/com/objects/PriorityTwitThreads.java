@@ -26,7 +26,13 @@ public class PriorityTwitThreads {
 							user.getUserTweetsAndWriteToFile();
 
 					} catch (PriorityUserException e) {
-						e.printStackTrace();
+						System.out.println(e.getMessage()  + user.getScreenName());
+						if (e.getMessage().equals(PriorityUserException.ALL_TWEETS)){
+							//we need the list to resort, but we don't want to lose
+							// the user to gather friends from
+							pq.remove();
+							pq.add(user);
+						}
 						if(e.getMessage().equals(PriorityUserException.INACCESSIBLE_USER))
 							pq.remove();
 					}

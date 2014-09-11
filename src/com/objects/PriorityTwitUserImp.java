@@ -99,28 +99,31 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 		statusesInJSON = Utility.toJSON(statuses);
 		if (this.getAmountOfTweetsReceived() == getUser().getStatusesCount()) {
 			updateZeroStatusUser();
+		} else {
+			updateLastIdAndLastReceivedDate(statuses);
 		}
-		
+
 		return statusesInJSON;
 
 	}
-	
 
 	private void checkZeroOrAllStatusesReceived() throws PriorityUserException {
 		if (isReceivedAllTweets() || getUser().getStatusesCount() == 0) {
 			updateZeroStatusUser();
 			throw new PriorityUserException(PriorityUserException.ALL_TWEETS);
-		} 
+		}
 	}
 
 	private void updateZeroStatusUser() {
 		this.setLastRetrievedTweetDate(new Date(Long.MIN_VALUE));
 		this.setReceivedAllTweets(true);
 	}
-	private void increaseTweetRetrievedCount (int retrievedCount ){
+
+	private void increaseTweetRetrievedCount(int retrievedCount) {
 		int curr = this.getAmountOfTweetsReceived();
 		this.setAmountOfTweetsReceived(curr + retrievedCount);
 	}
+
 	private void updateLastIdAndLastReceivedDate(List<Status> statuses) {
 		for (Status s : statuses) {
 			if (s.getId() < getLastId()) {
@@ -134,6 +137,7 @@ public class PriorityTwitUserImp extends PriorityTwitUser {
 
 	public void getUserTweetsAndWriteToFile() throws PriorityUserException {
 		List<String> statuses = retrieve100TweetsAndUpdateUser();
+
 		String path = this.getPath();
 		WriteFunctions.writeTweetsToFile(statuses, path);
 
